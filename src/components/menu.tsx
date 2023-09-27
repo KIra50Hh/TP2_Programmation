@@ -4,10 +4,15 @@ import { FC, memo, Fragment } from "react";
 import { Popover, Transition } from "@headlessui/react";
 import { MenuBar, Button } from "tp-kit/components";
 import { ShoppingBag, X } from "@phosphor-icons/react";
+import {removeLine, updateLine, useStore} from "../hooks/use-cart";
+import {ProductCartLine} from "tp-kit/components/products";
 
 type Props = {};
 
 const Menu: FC<Props> = memo(function () {
+    console.log("rendu page");
+    const lines = useStore((state) => state.lines);
+
   return (
     <MenuBar
       trailing={
@@ -35,7 +40,24 @@ const Menu: FC<Props> = memo(function () {
               >
                 <Popover.Panel className="absolute left-0 sm:left-auto right-0 top-full z-10 mt-6 sm:w-full sm:max-w-sm">
                   <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 bg-white p-8">
-                    <p className="my-12 text-center text-gray-600 text-sm">Votre panier est vide</p>
+                      {lines.map((line) => (
+                          <ProductCartLine
+                              className={"mb-4"}
+                              key={line.product.id}
+                              product={line.product}
+                              qty={line.qty}
+                              onDelete={() => {
+                                  removeLine(line.product.id);
+                              }}
+                              onQtyChange={(qty) => {
+                                  if (qty === 0) {
+                                      removeLine(line.product.id);
+                                  } else {
+                                      updateLine({product: line.product, qty: qty});
+                                  }
+                              }}
+                          />
+                      ))}
                   </div>
                 </Popover.Panel>
               </Transition>
