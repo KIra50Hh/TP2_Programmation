@@ -4,6 +4,7 @@ import {ProductData} from "tp-kit/types";
 
 export const useStore = create((set) => ({
     lines: [] as ProductLineData[],
+    count : 0,
 }))
 
 /**
@@ -26,6 +27,9 @@ export function addLine(product: ProductData) {
                 }),
             }
         }
+        if(!line)
+            useStore.setState({count : useStore.getState().count + 1})
+
         return {
             lines: [...state.lines, { product, qty: 1 }],
         }
@@ -58,10 +62,17 @@ export function updateLine(line: ProductLineData) {
  */
 export function removeLine(productId: number) {
     useStore.setState((state: CartData) => {
-        return {
-            lines: state.lines.filter((l) => l.product.id !== productId),
+        const updatedLines = state.lines.filter((l) => l.product.id !== productId);
+        if (useStore.getState().count > 0) {
+            if (updatedLines.length < state.lines.length) {
+                useStore.setState({ count: useStore.getState().count - 1 });
+            }
         }
-    })
+
+        return {
+            lines: updatedLines,
+        };
+    });
 }
 
 /**
