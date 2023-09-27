@@ -1,11 +1,13 @@
 "use client";
 
-import { FC, memo, Fragment } from "react";
+import React, { FC, memo, Fragment } from "react";
 import { Popover, Transition } from "@headlessui/react";
 import { MenuBar, Button } from "tp-kit/components";
 import { ShoppingBag, X } from "@phosphor-icons/react";
-import {removeLine, updateLine, useStore} from "../hooks/use-cart";
+import {clearCart, removeLine, updateLine, useStore} from "../hooks/use-cart";
 import {ProductCartLine} from "tp-kit/components/products";
+import Cart from "./Cart";
+import CartCounter from "./CartCounter";
 
 type Props = {};
 
@@ -24,9 +26,7 @@ const Menu: FC<Props> = memo(function () {
                   ? <X size={18} weight="regular" />
                   : <ShoppingBag size={24} weight="regular" />}
 
-                <div className="aspect-square bg-brand text-white text-center text-xs absolute right-0 top-0 rounded-full flex items-center justify-center h-[20px] w-[20px]">
-                  <div>0</div>
-                </div>
+                <CartCounter/>
               </Popover.Button>
 
 
@@ -40,26 +40,8 @@ const Menu: FC<Props> = memo(function () {
                 leaveTo="opacity-0 translate-y-1"
               >
                 <Popover.Panel className="absolute left-0 sm:left-auto right-0 top-full z-10 mt-6 sm:w-full sm:max-w-sm">
-                  <div className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 bg-white p-8">
-                      {lines.map((line) => (
-                          <ProductCartLine
-                              className={"mb-4"}
-                              key={line.product.id}
-                              product={line.product}
-                              qty={line.qty}
-                              onDelete={() => {
-                                  removeLine(line.product.id);
-                              }}
-                              onQtyChange={(qty) => {
-                                  if (qty === 0) {
-                                      removeLine(line.product.id);
-                                  } else {
-                                      updateLine({product: line.product, qty: qty});
-                                  }
-                              }}
-                          />
-                      ))}
-                  </div>
+                  <Cart/>
+
                 </Popover.Panel>
               </Transition>
             </>
@@ -68,6 +50,7 @@ const Menu: FC<Props> = memo(function () {
       }
     />
   );
+
 });
 
 Menu.displayName = "Menu";

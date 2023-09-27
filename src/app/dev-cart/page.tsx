@@ -50,11 +50,7 @@ export default function DevCartPage() {
 
             <section className="w-full lg:w-1/3 space-y-8">
                 <h2 className="text-2xl font-bold">Panier</h2>
-
                 <Cart/>
-
-
-
                 {/* Afficher le total du panier */}
                 <div className="flex justify-between items-center">
                     <span className="text-lg font-semibold">Total :</span>
