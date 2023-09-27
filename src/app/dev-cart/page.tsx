@@ -1,18 +1,20 @@
-import React from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import { Button, ProductCardLayout, SectionContainer, ProductCartLine } from "tp-kit/components";
 import { PRODUCTS_CATEGORY_DATA } from "tp-kit/data";
+import { useStore, computeCartTotal, clearCart, addLine } from "../../hooks/use-cart";
 
 const products = PRODUCTS_CATEGORY_DATA[0].products.slice(0, 3);
 
 export default function DevCartPage() {
-    const cartItems = [
-        { product: products[0], quantity: 1 },
-        { product: products[1], quantity: 2 },
-    ];
+    const cartItems = useStore((state) => state.lines);
 
-    const total = cartItems.reduce((acc, item) => {
-        return acc + item.product.price * item.quantity;
-    }, 0);
+    // Calculer le total du panier chaque fois que le panier change
+    const [total, setTotal] = useState(computeCartTotal(cartItems));
+
+    useEffect(() => {
+        setTotal(computeCartTotal(cartItems));
+    }, [cartItems]);
 
     return (
         <SectionContainer
@@ -25,7 +27,15 @@ export default function DevCartPage() {
                     <ProductCardLayout
                         key={product.id}
                         product={product}
-                        button={<Button variant={"ghost"} fullWidth>Ajouter au panier</Button>}
+                        button={
+                            <Button
+                                variant={"ghost"}
+                                fullWidth
+                                onClick={() => addLine(product)}
+                            >
+                                Ajouter au panier
+                            </Button>
+                        }
                     />
                 ))}
             </section>
@@ -40,7 +50,7 @@ export default function DevCartPage() {
                     <ProductCartLine
                         key={index}
                         product={item.product}
-                        qty={item.quantity}
+                        qty={item.qty}
                     />
                 ))}
 
@@ -51,7 +61,9 @@ export default function DevCartPage() {
                 </div>
 
                 {/* Bouton pour vider le panier */}
-                <Button variant={"outline"} fullWidth>Vider le panier</Button>
+                <Button variant={"outline"} fullWidth onClick={clearCart}>
+                    Vider le panier
+                </Button>
 
                 {/* Bouton pour commander */}
                 <Button variant={"primary"} fullWidth>Commander</Button>
