@@ -5,6 +5,7 @@ export const getCategory = cache(async (slug: string) => {
     return await prisma.productCategory.findFirst({ where: { slug }, include: { products: true } })
 })
 
-export const getProduits=cache(async (slug:string)=>{
-    return await prisma.product.findUnique({where :{}})
-})
+export const getProduct = cache(async (slug: string) => {
+  return await prisma.product.findFirst({ where: { slug } });
+});
+

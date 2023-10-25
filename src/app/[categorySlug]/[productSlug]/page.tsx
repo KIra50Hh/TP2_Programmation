@@ -1,37 +1,43 @@
-import {
-  BreadCrumbs,
-  Button,
-  FormattedPrice,
-  ProductCardLayout,
-  ProductGridLayout,
-  ProductRating,
-  ProductImage,
-  SectionContainer,
-} from "tp-kit/components";
-import { NextPageProps } from "../../../types";
-import { PRODUCTS_CATEGORY_DATA } from "tp-kit/data";
+import {BreadCrumbs, Button, FormattedPrice, ProductCardLayout, ProductGridLayout, ProductRating, ProductImage, SectionContainer,}
+from "tp-kit/components";
+import { NextPageProps } from "../../../types";;
 import { Metadata } from "next";
-import {
-  ProductAttribute,
-  ProductAttributesTable,
-} from "../../../components/product-attributes-table";
-const product = {
-  ...PRODUCTS_CATEGORY_DATA[0].products[0],
-  category: {
-    ...PRODUCTS_CATEGORY_DATA[0],
-    products: PRODUCTS_CATEGORY_DATA[0].products.slice(1),
-  },
-};
-
+import { ProductAttribute, ProductAttributesTable} from "../../../components/product-attributes-table";
+import prisma from "../../../utils/prisma";
+import { cache } from "react";
+export const getProduct = cache(async (slugCat: string, slugProd: string) => {
+  const product = await prisma.product.findUnique({
+    include: {
+      category: {
+        include: {
+          products: {
+            where: {
+              slug: {not: slugCat}
+            }
+          }
+        }
+      }
+    },
+    where: {
+      slug: slugProd
+    }
+  })
+  return product;
+})
+ 
 type Props = {
   categorySlug: string;
   productSlug: string;
 };
 
-export async function generateMetadata({
-  params,
-  searchParams,
-}: NextPageProps<Props>): Promise<Metadata> {
+export async function generateMetadata({params,searchParams}: NextPageProps<Props>): Promise<Metadata> {
+  const product = await getProduct(params.categorySlug, params.productSlug);
+  if (!product) {
+    const error = new Error("Category not found");
+    (error as any).statusCode = 404;
+    throw error;
+  }
+  console.log(params)
   return {
     title: product.name,
     description:
@@ -39,7 +45,7 @@ export async function generateMetadata({
       `Succombez pour notre ${product.name} et commandez-le sur notre site !`,
   };
 }
-
+ 
 const productAttributes: ProductAttribute[] = [
   { label: "Intensité", rating: 3 },
   { label: "Volupté", rating: 2 },
@@ -47,8 +53,14 @@ const productAttributes: ProductAttribute[] = [
   { label: "Onctuosité", rating: 4 },
   { label: "Instagramabilité", rating: 5 },
 ];
-
 export default async function ProductPage({ params }: NextPageProps<Props>) {
+  const product = await getProduct(params.categorySlug, params.productSlug);
+
+  if (!product) {
+    const error = new Error("Category not found");
+    (error as any).statusCode = 404;
+    throw error;
+  }
   return (
     <SectionContainer wrapperClassName="max-w-5xl">
       <BreadCrumbs
@@ -68,7 +80,7 @@ export default async function ProductPage({ params }: NextPageProps<Props>) {
           },
         ]}
       />
-
+ 
       {/* Produit */}
       <section className="flex flex-col md:flex-row justify-center gap-8">
         {/* Product Image */}
@@ -78,20 +90,16 @@ export default async function ProductPage({ params }: NextPageProps<Props>) {
             priority
             className="rounded-lg sticky top-12 object-cover sm:aspect-video md:aspect-auto w-full md:w-[300px]"
           />
-        </div>
-
+        </div> 
         {/* Product body */}
         <div className="flex-1">
           <div className="prose prose-lg">
             {/* Product Name */}
             <h1>{product.name}</h1>
-
             {/* Product Rating */}
             <ProductRating value={4} size={18} />
-
             {/* Desc */}
             <p>{product.desc}</p>
-
             {/* Prix et ajout au panier */}
             <div className="flex justify-between items-center gap-8">
               <p className="!my-0 text-xl">
@@ -100,12 +108,10 @@ export default async function ProductPage({ params }: NextPageProps<Props>) {
               <Button variant={"primary"}>Ajouter au panier</Button>
             </div>
           </div>
-
           {/* Products attribute */}
           <ProductAttributesTable className="mt-6" data={productAttributes} />
         </div>
       </section>
-
       {/* Related products */}
       <section>
         <div className="mt-24">
@@ -122,7 +128,8 @@ export default async function ProductPage({ params }: NextPageProps<Props>) {
                     Ajouter au panier
                   </Button>
                 }
-              />
+            />
+
             )}
           </ProductGridLayout>
         </div>
