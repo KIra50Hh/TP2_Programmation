@@ -1,15 +1,21 @@
 import { BreadCrumbs, SectionContainer } from "tp-kit/components";
+
 import { PRODUCTS_CATEGORY_DATA } from "tp-kit/data";
 import { ProductList } from "../components/product-list";
 import { Metadata } from "next";
-const categories = PRODUCTS_CATEGORY_DATA;
-
-export const metadata:Metadata = {
+import prisma from "../utils/prisma";
+export const metadata: Metadata = {
   title: `Page d’accueil - Starbucks`,
-  description: "Commandez de délicieuses boissons préparées avec soin par nos baristas"
+  description: "Commandez de délicieuses boissons préparées avec soin par nos baristas",
 }
-
-export default function Home() {
+  
+const categories= await prisma.productCategory.findMany
+({
+    include: {
+      products: true,
+    },
+  });
+export default async function Home() {
   return (<SectionContainer>
     <BreadCrumbs items={[
       {
@@ -17,7 +23,8 @@ export default function Home() {
         url: "/"
       }
     ]} />
-
     <ProductList categories={categories} showFilters />
+
   </SectionContainer>);
+
 }
