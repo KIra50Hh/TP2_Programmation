@@ -1,71 +1,51 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { NextResponse, type NextRequest } from 'next/server'
+import prisma from '../../../utils/prisma';
  
-const prisma = new PrismaClient();
+export async function GET(request: NextRequest) {
+  const searchParams = request.nextUrl.searchParams;
+  const search = searchParams?.get('search') as string;
+  const categories = searchParams?.getAll('cat') as string[];
  
-export async function GET(req : Request) {
-    const { searchParams } = new URL(req.url)
-    const search = searchParams.get('search')
-    const cat = searchParams.getAll('cat')
-
-    let result
-    
-    if (cat.length > 0 && search != null) {
-        result = await prisma.productCategory.findMany({
-            include: {
-                products: {
-                    where: {
-                        slug: {
-                            contains: search,
-                            mode:"insensitive"
-                        }
-                    }
-                }
-            },
-            where: {
-                slug: {
-                    in: cat
-                }
-            }
-        })
-    } else if (cat.length > 0) {
-        result = await prisma.productCategory.findMany({
-            include: {
-                products:true
-            },
-            where: {
-                slug: {
-                    in: cat
-                }
-            }
-        })
-    } else if (search != null) {
-        result = await prisma.productCategory.findMany({
-            include: {
-                products: {
-                    where: {
-                        slug: {
-                            contains: search,
-                            mode:"insensitive"
-                        }
-                    }
-                }
-            }
-        })
-    } else {
-        result = await prisma.productCategory.findMany({
-            include:{
-                products:true
-            }
-        })
-    }
-
-    return NextResponse.json(
-        {
-            params:{
-                categoriesSlugs:cat,
-                search:search
-            },
-            categories:result
-        })
+  const params = {
+    include: {
+      products: {
+        where: {
+          slug: {
+            contains: "",
+            mode: "insensitive"
+          }
+        },
+      },
+    },
+    where: {},
+  };
+ 
+  if (search) {
+    params.include.products.where = {
+      slug: {
+        contains: search,
+        mode: params.include.products.where.slug.mode,
+      },
+    };
+  }
+ 
+  if (categories && categories.length > 0) {
+    params.where = {
+      slug: {
+        in: categories,
+      },
+    };
+  }
+ 
+  const result = await prisma.productCategory.findMany(params);
+ 
+  const responseObject = {
+    params: {
+      categoriesSlugs: categories || [],
+      search: search || "",
+    },
+    categories: result || [],
+  };
+ 
+  return NextResponse.json(responseObject);
 }
