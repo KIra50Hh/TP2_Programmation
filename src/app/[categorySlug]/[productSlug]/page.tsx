@@ -5,6 +5,7 @@ import { Metadata } from "next";
 import { ProductAttribute, ProductAttributesTable} from "../../../components/product-attributes-table";
 import prisma from "../../../utils/prisma";
 import { cache } from "react";
+import { createOrder } from "../../../actions/create-orders";
 export const getProduct = cache(async (slugCat: string, slugProd: string) => {
   const product = await prisma.product.findUnique({
     include: {
@@ -24,6 +25,7 @@ export const getProduct = cache(async (slugCat: string, slugProd: string) => {
   })
   return product;
 })
+
  
 type Props = {
   categorySlug: string;

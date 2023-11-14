@@ -4,10 +4,13 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'www.starbucks.fr',
-      },
+        hostname: 'www.starbucks.fr', 
+      }, 
     ],
-  }
+      experimental: {
+        serverActions: true,
+      },
+    }  
 }
 
 module.exports = nextConfig
