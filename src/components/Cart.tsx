@@ -1,6 +1,8 @@
+"use client"
 import {Button, ProductCartLine} from "tp-kit/components";
 import {clearCart, computeCartTotal, removeLine, updateLine, useStore} from "../hooks/use-cart";
 import {useEffect, useState} from "react";
+import { createOrder } from "../actions/create-orders";
 
 export default function Cart() {
     const lines = useStore((state) => state.lines);
@@ -9,7 +11,6 @@ export default function Cart() {
     useEffect(() => {
         setTotal(computeCartTotal(lines));
     }, [lines]);
-
     return (
         <div
             className="overflow-hidden rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 bg-white p-8 flex justify-between flex-col"
@@ -49,6 +50,9 @@ export default function Cart() {
                 className="mt-8"
                 fullWidth
                 variant={"primary"}
+                
+                
+
             >
                 Commander
             </Button>
